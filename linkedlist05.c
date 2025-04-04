@@ -31,7 +31,7 @@ void insert_at_beginning(struct Node** head_ref, int data) {
 
 // Main function
 int main() {
-    // Create initial list manually like Python example
+  
     struct Node* head = (struct Node*)malloc(sizeof(struct Node));
     struct Node* n1 = (struct Node*)malloc(sizeof(struct Node));
     struct Node* n2 = (struct Node*)malloc(sizeof(struct Node));
