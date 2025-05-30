@@ -1,8 +1,8 @@
-// AVL Tree Example (Self-balancing Binary Search Tree)
+/*  AVL Tree in C (With Insert and Inorder Traversal) */
 #include <stdio.h>
 #include <stdlib.h>
 
-// Define structure for a tree node
+// Define the node structure
 struct Node {
     int data;
     struct Node* left;
@@ -10,84 +10,115 @@ struct Node {
     int height;
 };
 
-// Function to get the height of a node
-int height(struct Node* node) {
-    if (node == NULL)
-        return 0;
-    return node->height;
+// Utility function to get max of two integers
+int max(int a, int b) {
+    return (a > b) ? a : b;
 }
 
-// Function to get the balance factor of a node
-int balanceFactor(struct Node* node) {
+// Get height of a node
+int height(struct Node* N) {
+    if (N == NULL)
+        return 0;
+    return N->height;
+}
+
+// Allocate a new node
+struct Node* createNode(int data) {
+    struct Node* node = (struct Node*)malloc(sizeof(struct Node));
+    node->data = data;
+    node->left = NULL;
+    node->right = NULL;
+    node->height = 1; // New node is initially at height 1
+    return node;
+}
+
+// Right rotate
+struct Node* rightRotate(struct Node* y) {
+    struct Node* x = y->left;
+    struct Node* T2 = x->right;
+
+    // Perform rotation
+    x->right = y;
+    y->left = T2;
+
+    // Update heights
+    y->height = max(height(y->left), height(y->right)) + 1;
+    x->height = max(height(x->left), height(x->right)) + 1;
+
+    // Return new root
+    return x;
+}
+
+// Left rotate
+struct Node* leftRotate(struct Node* x) {
+    struct Node* y = x->right;
+    struct Node* T2 = y->left;
+
+    // Perform rotation
+    y->left = x;
+    x->right = T2;
+
+    // Update heights
+    x->height = max(height(x->left), height(x->right)) + 1;
+    y->height = max(height(y->left), height(y->right)) + 1;
+
+    // Return new root
+    return y;
+}
+
+// Get balance factor
+int getBalance(struct Node* node) {
     if (node == NULL)
         return 0;
     return height(node->left) - height(node->right);
 }
 
-// Right rotation for balancing the tree
-struct Node* rightRotate(struct Node* y) {
-    struct Node* x = y->left;
-    struct Node* T2 = x->right;
-    
-    x->right = y;
-    y->left = T2;
-    
-    y->height = 1 + (height(y->left) > height(y->right) ? height(y->left) : height(y->right));
-    x->height = 1 + (height(x->left) > height(x->right) ? height(x->left) : height(x->right));
-    
-    return x;
-}
-
-// Left rotation for balancing the tree
-struct Node* leftRotate(struct Node* x) {
-    struct Node* y = x->right;
-    struct Node* T2 = y->left;
-    
-    y->left = x;
-    x->right = T2;
-    
-    x->height = 1 + (height(x->left) > height(x->right) ? height(x->left) : height(x->right));
-    y->height = 1 + (height(y->left) > height(y->right) ? height(y->left) : height(y->right));
-    
-    return y;
-}
-
-// Function to insert a node in the AVL tree
-struct Node* insert(struct Node* node, int data) {
+// Insert a node
+struct Node* insert(struct Node* node, int key) {
+    // 1. Perform the normal BST insertion
     if (node == NULL)
-        return createNode(data);
+        return createNode(key);
 
-    if (data < node->data)
-        node->left = insert(node->left, data);
-    else if (data > node->data)
-        node->right = insert(node->right, data);
-    else
+    if (key < node->data)
+        node->left = insert(node->left, key);
+    else if (key > node->data)
+        node->right = insert(node->right, key);
+    else // Equal keys not allowed
         return node;
 
-    node->height = 1 + (height(node->left) > height(node->right) ? height(node->left) : height(node->right));
+    // 2. Update height
+    node->height = 1 + max(height(node->left), height(node->right));
 
-    int balance = balanceFactor(node);
-    
-    if (balance > 1 && data < node->left->data)
+    // 3. Get the balance factor
+    int balance = getBalance(node);
+
+    // 4. Balance the node if needed
+
+    // Left Left Case
+    if (balance > 1 && key < node->left->data)
         return rightRotate(node);
-    
-    if (balance < -1 && data > node->right->data)
+
+    // Right Right Case
+    if (balance < -1 && key > node->right->data)
         return leftRotate(node);
-    
-    if (balance > 1 && data > node->left->data) {
+
+    // Left Right Case
+    if (balance > 1 && key > node->left->data) {
         node->left = leftRotate(node->left);
         return rightRotate(node);
     }
-    
-    if (balance < -1 && data < node->right->data) {
+
+    // Right Left Case
+    if (balance < -1 && key < node->right->data) {
         node->right = rightRotate(node->right);
         return leftRotate(node);
     }
-    
+
+    // Return the (unchanged) node pointer
     return node;
 }
 
-// Function to print Inorder Traversal
+// Inorder traversal
 void inorder(struct Node* root) {
     if (root != NULL) {
         inorder(root->left);
@@ -99,15 +130,18 @@ void inorder(struct Node* root) {
 // Main function
 int main() {
     struct Node* root = NULL;
-    
+
+    // Inserting values
     root = insert(root, 10);
     root = insert(root, 20);
     root = insert(root, 30);
+    root = insert(root, 40);
+    root = insert(root, 50);
     root = insert(root, 25);
-    root = insert(root, 28);
-    
-    printf("Inorder Traversal: ");
-    inorder(root);  // Output: 10 20 25 28 30
+
+    printf("Inorder traversal of the AVL tree:\n");
+    inorder(root);
+    printf("\n");
 
     return 0;
 }
